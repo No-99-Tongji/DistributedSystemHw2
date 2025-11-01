@@ -53,7 +53,7 @@ class ClientHandler extends Thread {
                     if((inputLine = in.readLine()) != null) {
                         try {
                             int studentId = Integer.parseInt(inputLine);
-                            ProcessBuilder pb = new ProcessBuilder("java", "QueryByStudentId", String.valueOf(studentId));
+                            ProcessBuilder pb = new ProcessBuilder("java", "QueryByStudentId.java", String.valueOf(studentId));
                             pb.directory(new File(System.getProperty("user.home") + "/DistributedSystemHw2"));
                             pb.redirectErrorStream(true);
                             Process process = pb.start();
