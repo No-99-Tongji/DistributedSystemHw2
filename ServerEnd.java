@@ -75,29 +75,40 @@ class ClientHandler extends Thread {
                     }
                 }
                 else if (inputLine.equals("score")) {
-                    out.println("请输入要查询的学生分数");
-                    if ((inputLine = in.readLine()) != null) {
-                        try {
-                            float score = Float.parseFloat(inputLine);
-                            ProcessBuilder pb = new ProcessBuilder("java", "QueryByScore", String.valueOf(score));
-                            pb.directory(new File(System.getProperty("user.home") + "/DistributedSystemHw2"));
-                            pb.redirectErrorStream(true);
-                            Process process = pb.start();
+                    out.println("请输入要查询的最小语文成绩:");
+                    String minScoreStr = in.readLine();
+                    if (minScoreStr != null) {
+                        out.println("请输入要查询的最大语文成绩:");
+                        String maxScoreStr = in.readLine();
+                        if (maxScoreStr != null) {
+                            try {
+                                float minScore = Float.parseFloat(minScoreStr);
+                                float maxScore = Float.parseFloat(maxScoreStr);
 
-                            // 读取子进程的输出
-                            BufferedReader processOutput = new BufferedReader(
-                                new InputStreamReader(process.getInputStream()));
-                            String line;
-                            while ((line = processOutput.readLine()) != null) {
-                                out.println(line);
+                                if (minScore > maxScore) {
+                                    out.println("错误: 最小成绩不能大于最大成绩");
+                                } else {
+                                    ProcessBuilder pb = new ProcessBuilder("java", "QueryByChineseScoreRange.java",
+                                        String.valueOf(minScore), String.valueOf(maxScore));
+                                    pb.directory(new File(System.getProperty("user.home") + "/DistributedSystemHw2"));
+                                    pb.redirectErrorStream(true);
+                                    Process process = pb.start();
+
+                                    // 读取子进程的输出
+                                    BufferedReader processOutput = new BufferedReader(
+                                        new InputStreamReader(process.getInputStream()));
+                                    String line;
+                                    while ((line = processOutput.readLine()) != null) {
+                                        out.println(line);
+                                    }
+                                    process.waitFor();
+                                }
+                            } catch (InterruptedException e) {
+                                out.println("查询被中断");
+                                Thread.currentThread().interrupt();
+                            } catch (NumberFormatException e) {
+                                out.println("请输入有效的分数（浮点数）");
                             }
-                            process.waitFor();
-                        }
-                        catch (InterruptedException e) {
-                            out.println("查询被中断");
-                            Thread.currentThread().interrupt();
-                        } catch (NumberFormatException e) {
-                            out.println("请输入有效的分数（浮点数）");
                         }
                     }
                 }
