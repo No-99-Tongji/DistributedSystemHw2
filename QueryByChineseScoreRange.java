@@ -195,19 +195,24 @@ public class QueryByChineseScoreRange {
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
         try {
             System.out.println("=== 语文成绩范围查询系统 ===");
             System.out.println("索引文件: 2353250-hw2.idx");
             System.out.println("数据文件: 2353250-hw2.dat2");
             System.out.println();
 
-            System.out.print("请输入最小语文成绩（例如 89.5）: ");
-            float minScore = scanner.nextFloat();
+            // 检查命令行参数
+            if (args.length != 2) {
+                System.out.println("使用方法: java QueryByChineseScoreRange <最小成绩> <最大成绩>");
+                System.out.println("例如: java QueryByChineseScoreRange 89.5 92.1");
+                return;
+            }
 
-            System.out.print("请输入最大语文成绩（例如 92.1）: ");
-            float maxScore = scanner.nextFloat();
+            float minScore = Float.parseFloat(args[0]);
+            float maxScore = Float.parseFloat(args[1]);
+
+            System.out.println("最小语文成绩: " + minScore);
+            System.out.println("最大语文成绩: " + maxScore);
 
             if (minScore > maxScore) {
                 System.out.println("错误: 最小成绩不能大于最大成绩");
@@ -243,11 +248,13 @@ public class QueryByChineseScoreRange {
         } catch (IOException e) {
             System.err.println("错误: " + e.getMessage());
             e.printStackTrace();
-        } catch (Exception e) {
-            System.err.println("输入错误，请输入有效的成绩（浮点数）");
+        } catch (NumberFormatException e) {
+            System.err.println("参数错误: 请输入有效的成绩（浮点数）");
+            System.err.println("使用方法: java QueryByChineseScoreRange <最小成绩> <最大成绩>");
             e.printStackTrace();
-        } finally {
-            scanner.close();
+        } catch (Exception e) {
+            System.err.println("程序执行错误: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

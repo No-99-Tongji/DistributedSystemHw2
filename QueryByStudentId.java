@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.Scanner;
 
 public class QueryByStudentId {
 
@@ -90,15 +89,21 @@ public class QueryByStudentId {
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
         try {
             System.out.println("=== 学生信息查询系统 ===");
             System.out.println("数据文件: 2353250-hw2.dat1");
-            System.out.print("请输入要查询的学号: ");
+            System.out.println();
 
-            int studentId = scanner.nextInt();
+            // 检查命令行参数
+            if (args.length != 1) {
+                System.out.println("使用方法: java QueryByStudentId <学号>");
+                System.out.println("例如: java QueryByStudentId 2023001");
+                return;
+            }
 
+            int studentId = Integer.parseInt(args[0]);
+
+            System.out.println("要查询的学号: " + studentId);
             System.out.println("\n正在查询学号 " + studentId + " 的信息...\n");
 
             QueryResult result = queryStudentById(studentId);
@@ -115,10 +120,13 @@ public class QueryByStudentId {
         } catch (IOException e) {
             System.err.println("错误: " + e.getMessage());
             e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.err.println("参数错误: 请输入有效的学号（整数）");
+            System.err.println("使用方法: java QueryByStudentId <学号>");
+            e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("输入错误，请输入有效的学号（整数）");
-        } finally {
-            scanner.close();
+            System.err.println("程序执行错误: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
