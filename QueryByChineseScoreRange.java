@@ -106,38 +106,39 @@ public class QueryByChineseScoreRange {
         System.out.println("  输入成绩范围: [" + minScore + ", " + maxScore + "]");
         System.out.println("  整数范围: [" + minScoreInt + ", " + maxScoreInt + "]");
 
-        // 3. 从索引中找到对应的字节位置范围
-        long startBytePos = -1;
-        long endBytePos = -1;
-
-        // 找到 >= minScoreInt 的最小整数对应的位置（作为起始位置）
+        // 3. 创建索引映射表 (成绩整数值 -> 字节位置)
+        Map<Integer, Long> scoreToPositionMap = new HashMap<>();
         for (IndexNode node : indexNodes) {
-            if (node.chineseScoreInt >= minScoreInt) {
-                startBytePos = node.bytePosition;
+            scoreToPositionMap.put(node.chineseScoreInt, node.bytePosition);
+        }
+
+        // 4. 从索引中找到对应的字节位置范围
+        long startBytePos = 0; // 默认从文件开头开始
+        long endBytePos = -1;  // 默认读到文件末尾
+
+        // 找到第一个 <= maxScoreInt 的整数对应的位置作为起始位置
+        // 由于文件是按成绩从高到低排序，我们需要从最高的可能成绩开始查找
+        for (int score = 100; score >= 0; score--) {
+            if (score <= maxScoreInt && scoreToPositionMap.containsKey(score)) {
+                startBytePos = scoreToPositionMap.get(score);
                 break;
             }
         }
 
-        // 找到 > maxScoreInt 的最小整数对应的位置（作为结束位置的上界）
-        // 如果找不到，说明要读到文件末尾
-        for (IndexNode node : indexNodes) {
-            if (node.chineseScoreInt > maxScoreInt) {
-                endBytePos = node.bytePosition;
+        // 找到第一个 < minScoreInt 的整数对应的位置作为结束位置
+        for (int score = minScoreInt - 1; score >= 0; score--) {
+            if (scoreToPositionMap.containsKey(score)) {
+                endBytePos = scoreToPositionMap.get(score);
                 break;
             }
         }
 
-        if (startBytePos == -1) {
-            // 没有符合条件的数据
-            long queryTime = System.currentTimeMillis() - startTime;
-            return new QueryResult(0, 0.0, queryTime, new ArrayList<>());
-        }
 
         System.out.println("\n索引查找结果:");
         System.out.println("  起始字节位置: " + startBytePos);
         System.out.println("  结束字节位置: " + (endBytePos == -1 ? "文件末尾" : endBytePos));
 
-        // 4. 使用随机访问方式读取文件中的数据
+        // 5. 使用随机访问方式读取文件中的数据
         List<Student> studentsInRange = new ArrayList<>();
         double totalScore = 0;
 
